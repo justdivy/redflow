@@ -8,6 +8,7 @@ import {
   Hospital,
   Droplet,
 } from "lucide-react";
+import { Navigate } from "react-router-dom";
 
 const roleIcons = {
   user: <User className="text-blue-500" />,
@@ -17,15 +18,19 @@ const roleIcons = {
 };
 
 const Profile = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  let user = null;
+
+  try {
+    user = JSON.parse(localStorage.getItem("user"));
+  } catch {
+    user = null;
+  }
+
   const role = localStorage.getItem("role");
 
-  if (!user) {
-    return (
-      <div className="text-center text-gray-500 mt-10">
-        User data not found
-      </div>
-    );
+  // 🔒 Protect page
+  if (!user || !role) {
+    return <Navigate to="/login" replace />;
   }
 
   return (
@@ -47,7 +52,7 @@ const Profile = () => {
         </div>
 
         <div className="flex items-center gap-3 bg-white text-red-600 px-4 py-2 rounded-full font-semibold shadow">
-          {roleIcons[role]}
+          {roleIcons[role] || <User />}
           <span className="capitalize">{role}</span>
         </div>
       </motion.div>

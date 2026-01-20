@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FaHeartbeat, FaHospitalAlt, FaMapMarkerAlt } from "react-icons/fa";
 import healthcare from "../assets/healthcare.svg";
-import LocationMap from "../components/LocationMap"; // Assuming LocationMap is a separate component
+import LocationMap from "../components/LocationMap";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -29,41 +29,51 @@ const hospitals = [
 ];
 
 const Donate = () => {
-  const [coordinates, setCoordinates] = useState(null); // Store selected coordinates
-  const [bloodType, setBloodType] = useState("A+"); // Default blood type
+  const [coordinates, setCoordinates] = useState(null);
+  const [bloodType, setBloodType] = useState("A+");
 
   const handleDonate = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      Swal.fire("Login Required", "Please login to donate blood", "warning");
+      return;
+    }
+
     if (!coordinates) {
-      Swal.fire({
-        icon: "warning",
-        title: "Location Needed",
-        text: "Please select a location before donating.",
-      });
+      Swal.fire("Location Needed", "Please select a location first", "warning");
       return;
     }
 
     try {
-      // Send donation data to the backend
-      const response = await axios.post("http://localhost:5000/api/donations", {
-        bloodType,
-        coordinates,
-      });
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/donations`,
+        {
+          bloodType,
+          coordinates,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      Swal.fire({
-        icon: "success",
-        title: "Donation Successful!",
-        text: `You are donating ${bloodType} blood at location (${coordinates.lat}, ${coordinates.lng}).`,
-      });
+      Swal.fire(
+        "Donation Successful 🩸",
+        `You donated ${bloodType} blood successfully!`,
+        "success"
+      );
 
-      // Reset after successful donation
       setCoordinates(null);
-      setBloodType("A+"); // Reset blood type
+      setBloodType("A+");
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Donation Failed",
-        text: "Something went wrong. Please try again.",
-      });
+      Swal.fire(
+        "Donation Failed",
+        error.response?.data?.message || "Something went wrong",
+        "error"
+      );
     }
   };
 
@@ -71,21 +81,15 @@ const Donate = () => {
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white px-6 py-10">
       {/* Hero Section */}
       <div className="flex flex-col lg:flex-row items-center justify-between gap-10 mb-14">
-        {/* Illustration */}
         <motion.div
           initial={{ x: -60, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8 }}
           className="w-full lg:w-1/2"
         >
-          <img
-            src={healthcare}
-            alt="Donate Blood"
-            className="w-full max-w-md mx-auto"
-          />
+          <img src={healthcare} alt="Donate Blood" className="w-full max-w-md mx-auto" />
         </motion.div>
 
-        {/* Text Content */}
         <motion.div
           initial={{ x: 60, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -93,65 +97,80 @@ const Donate = () => {
           className="w-full lg:w-1/2"
         >
           <h1 className="text-4xl font-bold text-red-600 mb-4 flex items-center gap-2">
-            <FaHeartbeat className="text-red-500" /> Donate & Save Lives
+            <FaHeartbeat /> Donate & Save Lives
           </h1>
           <p className="text-gray-600 text-lg mb-6">
-            Every drop counts. Use this page to find nearby hospitals that need your blood, or get alerts when a patient near you needs help.
+            Every drop counts. Choose your location and help someone in need.
           </p>
+
+          {/* Blood Type Selector */}
+          <select
+            value={bloodType}
+            onChange={(e) => setBloodType(e.target.value)}
+            className="border border-red-300 rounded-lg px-4 py-2 mb-4"
+          >
+            {["A+","A-","B+","B-","O+","O-","AB+","AB-"].map((bg) => (
+              <option key={bg} value={bg}>{bg}</option>
+            ))}
+          </select>
         </motion.div>
       </div>
 
-      {/* Location Selection (Map) */}
-      <div className="mb-10">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Choose Your Donation Location</h2>
-        <div className="w-full md:w-3/4 h-80 mb-8 mx-auto">
+      {/* Map */}
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6">
+          Choose Your Donation Location
+        </h2>
+
+        <div className="w-full md:w-3/4 h-80 mb-6 mx-auto">
           <LocationMap setCoordinates={setCoordinates} />
         </div>
+
         <motion.button
           whileHover={{ scale: 1.05 }}
-          className="bg-red-500 text-white px-6 py-3 rounded-xl shadow-md hover:bg-red-600"
           onClick={handleDonate}
+          className="bg-red-500 text-white px-6 py-3 rounded-xl shadow-md hover:bg-red-600"
         >
           Confirm Donation
         </motion.button>
       </div>
 
-      {/* Nearby Hospitals Section */}
+      {/* Nearby Hospitals */}
       <div className="mb-10">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">🏥 Nearby Hospitals Needing Blood</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          🏥 Nearby Hospitals Needing Blood
+        </h2>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {hospitals.map((hospital) => (
             <motion.div
               key={hospital.id}
               whileHover={{ scale: 1.02 }}
-              className="bg-white border border-red-200 rounded-2xl p-5 shadow hover:shadow-md transition"
+              className="bg-white border border-red-200 rounded-2xl p-5 shadow"
             >
               <div className="flex items-center gap-3 mb-2">
                 <FaHospitalAlt className="text-red-400 text-xl" />
-                <h3 className="text-xl font-semibold text-red-600">{hospital.name}</h3>
+                <h3 className="text-xl font-semibold text-red-600">
+                  {hospital.name}
+                </h3>
               </div>
+
               <div className="flex items-center text-sm text-gray-500 mb-2">
                 <FaMapMarkerAlt className="mr-2 text-red-400" />
                 {hospital.location}
               </div>
+
               <p className="text-gray-600 mb-2">Blood Needed:</p>
               <div className="flex flex-wrap gap-2">
-                {hospital.bloodNeeded.map((type, index) => (
+                {hospital.bloodNeeded.map((type) => (
                   <span
-                    key={index}
+                    key={type}
                     className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded-full font-semibold"
                   >
                     {type}
                   </span>
                 ))}
               </div>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                className="mt-4 w-full bg-red-500 text-white py-2 rounded-xl hover:bg-red-600 transition"
-              >
-                Donate Now
-              </motion.button>
             </motion.div>
           ))}
         </div>

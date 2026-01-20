@@ -34,7 +34,7 @@ const Login = () => {
         throw new Error("Invalid login response");
       }
 
-      // ✅ SAVE EVERYTHING PROPERLY
+    
       localStorage.setItem("token", token);
       localStorage.setItem("role", user.role); // 🔥 MOST IMPORTANT
       localStorage.setItem("user", JSON.stringify(user));
