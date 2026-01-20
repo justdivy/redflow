@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import 'leaflet/dist/leaflet.css';
+
+
+.input-style {
+    @apply p-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition-all;
+  }
+
+  html {
+    scroll-padding-top: 7rem; /* Adjust according to your navbar height */
+  }
+
+  {/*.glass-card {
+    @apply bg-white bg-opacity-60 backdrop-blur-md rounded-3xl p-6 shadow-xl;
+  }
+  
+  */}
+  
