@@ -3,20 +3,15 @@ import colors from "colors";
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    const conn = await mongoose.connect(process.env.MONGO_URI);
 
     console.log(
-      `MongoDB Connected: ${conn.connection.host}`.bgGreen.white
+      `MongoDB Connected: ${conn.connection.host}`.green.bold
     );
   } catch (error) {
     console.error(
-      `MongoDB Connection Error: ${error.message}`.bgRed.white
+      `MongoDB Connection Error: ${error.message}`.red.bold
     );
-
-   
     process.exit(1);
   }
 };

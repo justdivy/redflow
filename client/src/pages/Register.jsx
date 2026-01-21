@@ -4,10 +4,10 @@ import { BsDropletFill } from "react-icons/bs";
 import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { BiSolidDonateBlood } from "react-icons/bi";
 import { FaUsersLine } from "react-icons/fa6";
 import Swal from "sweetalert2";
+import api from "../config/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -29,39 +29,38 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const { name, email, password, confirmPassword, bloodGroup, role } = formData;
+
+    const { name, email, password, confirmPassword, bloodGroup, role } =
+      formData;
 
     if (!name || !email || !password || !confirmPassword || !bloodGroup || !role) {
-      Swal.fire("Oops!", "Please fill in all fields", "error");
-      return;
+      return Swal.fire("Oops!", "Please fill in all fields", "error");
     }
 
     if (password.length < 6) {
-      Swal.fire(
+      return Swal.fire(
         "Weak Password",
         "Password must be at least 6 characters",
         "warning"
       );
-      return;
     }
 
     if (password !== confirmPassword) {
-      Swal.fire("Mismatch", "Passwords do not match", "error");
-      return;
+      return Swal.fire("Mismatch", "Passwords do not match", "error");
     }
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/register`,
-        { name, email, password, bloodGroup, role },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const res = await api.post("/api/auth/register", {
+        name,
+        email,
+        password,
+        bloodGroup,
+        role,
+      });
 
       Swal.fire({
         icon: "success",
-        title: `Welcome ${res.data?.user?.name || "User"}!`,
+        title: `Welcome ${res?.data?.user?.name || "User"}!`,
         text: "Registration successful 🎉",
         timer: 2000,
         showConfirmButton: false,
@@ -130,24 +129,8 @@ const Register = () => {
         <form onSubmit={handleRegister} className="space-y-3">
           <Input icon={<FaUser />} name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} />
           <Input icon={<FaEnvelope />} name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
-          <PasswordInput
-            icon={<FaLock />}
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            show={showPassword}
-            toggle={() => setShowPassword(!showPassword)}
-            onChange={handleChange}
-          />
-          <PasswordInput
-            icon={<FaLock />}
-            name="confirmPassword"
-            placeholder="Confirm Password"
-            value={formData.confirmPassword}
-            show={showConfirmPassword}
-            toggle={() => setShowConfirmPassword(!showConfirmPassword)}
-            onChange={handleChange}
-          />
+          <PasswordInput icon={<FaLock />} name="password" placeholder="Password" value={formData.password} show={showPassword} toggle={() => setShowPassword(!showPassword)} onChange={handleChange} />
+          <PasswordInput icon={<FaLock />} name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} show={showConfirmPassword} toggle={() => setShowConfirmPassword(!showConfirmPassword)} onChange={handleChange} />
           <Input icon={<BiSolidDonateBlood />} name="bloodGroup" placeholder="Blood Group" value={formData.bloodGroup} onChange={handleChange} />
           <Input icon={<FaUsersLine />} name="role" placeholder="Role (patient / donor / hospital)" value={formData.role} onChange={handleChange} />
 
@@ -183,12 +166,7 @@ const Input = ({ icon, ...props }) => (
 const PasswordInput = ({ icon, show, toggle, ...props }) => (
   <div className="flex items-center border border-red-300 bg-red-50 rounded-lg px-3 py-2">
     <span className="text-red-500 mr-2 text-sm">{icon}</span>
-    <input
-      {...props}
-      type={show ? "text" : "password"}
-      className="w-full bg-transparent outline-none text-sm"
-      required
-    />
+    <input {...props} type={show ? "text" : "password"} className="w-full bg-transparent outline-none text-sm" required />
     <span onClick={toggle} className="ml-2 text-red-400 cursor-pointer text-sm">
       {show ? <AiFillEyeInvisible /> : <AiFillEye />}
     </span>

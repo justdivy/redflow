@@ -4,9 +4,11 @@ import { FaUser, FaLock } from "react-icons/fa";
 import { BsDropletFill } from "react-icons/bs";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
 import Swal from "sweetalert2";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import api from "../config/api.js";
+
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -23,10 +25,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        formData
-      );
+      const res = await api.post("/api/auth/login", formData);
 
       const { user, token } = res.data;
 
@@ -34,7 +33,6 @@ const Login = () => {
         throw new Error("Invalid login response");
       }
 
-    
       localStorage.setItem("token", token);
       localStorage.setItem("role", user.role); // 🔥 MOST IMPORTANT
       localStorage.setItem("user", JSON.stringify(user));
@@ -54,7 +52,6 @@ const Login = () => {
       setTimeout(() => {
         navigate(`/dashboard/${user.role}`);
       }, 1500);
-
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -151,7 +148,10 @@ const Login = () => {
 
         <p className="text-center text-sm text-gray-600 mt-4">
           Don’t have an account?{" "}
-          <Link to="/register" className="text-red-600 hover:underline font-medium">
+          <Link
+            to="/register"
+            className="text-red-600 hover:underline font-medium"
+          >
             Register now
           </Link>
         </p>

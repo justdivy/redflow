@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import { FaHeartbeat, FaHospitalAlt, FaMapMarkerAlt } from "react-icons/fa";
 import healthcare from "../assets/healthcare.svg";
 import LocationMap from "../components/LocationMap";
-import axios from "axios";
+// import axios from "axios";
 import Swal from "sweetalert2";
+import API_BASE_URL from "../config/api";
+import api from "../config/api";
 
 const hospitals = [
   {
@@ -46,24 +48,20 @@ const Donate = () => {
     }
 
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/donations`,
-        {
-          bloodType,
-          coordinates,
-        },
+      await api.post(
+        "/api/donations",
+        { bloodType, coordinates },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       Swal.fire(
         "Donation Successful 🩸",
         `You donated ${bloodType} blood successfully!`,
-        "success"
+        "success",
       );
 
       setCoordinates(null);
@@ -72,7 +70,7 @@ const Donate = () => {
       Swal.fire(
         "Donation Failed",
         error.response?.data?.message || "Something went wrong",
-        "error"
+        "error",
       );
     }
   };
@@ -87,7 +85,11 @@ const Donate = () => {
           transition={{ duration: 0.8 }}
           className="w-full lg:w-1/2"
         >
-          <img src={healthcare} alt="Donate Blood" className="w-full max-w-md mx-auto" />
+          <img
+            src={healthcare}
+            alt="Donate Blood"
+            className="w-full max-w-md mx-auto"
+          />
         </motion.div>
 
         <motion.div
@@ -109,8 +111,10 @@ const Donate = () => {
             onChange={(e) => setBloodType(e.target.value)}
             className="border border-red-300 rounded-lg px-4 py-2 mb-4"
           >
-            {["A+","A-","B+","B-","O+","O-","AB+","AB-"].map((bg) => (
-              <option key={bg} value={bg}>{bg}</option>
+            {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
+              <option key={bg} value={bg}>
+                {bg}
+              </option>
             ))}
           </select>
         </motion.div>

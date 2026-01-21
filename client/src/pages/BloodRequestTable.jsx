@@ -8,9 +8,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import axios from "axios";
+// import axios from "axios";
 import Swal from "sweetalert2";
 import donor from "../assets/donor.png";
+import api from "../config/api";
 
 const requestStats = [
   { day: "Mon", requests: 14 },
@@ -47,15 +48,11 @@ const BloodRequestPage = () => {
         return Swal.fire("Login Required", "Please login first", "warning");
       }
 
-      await axios.post(
-        "http://localhost:5000/api/blood-requests",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await api.post("/api/blood-requests", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       Swal.fire("Success", "Blood request submitted successfully", "success");
 
@@ -72,7 +69,7 @@ const BloodRequestPage = () => {
       Swal.fire(
         "Error",
         error.response?.data?.message || "Something went wrong",
-        "error"
+        "error",
       );
     }
   };
@@ -141,8 +138,10 @@ const BloodRequestPage = () => {
               required
             >
               <option value="">Select Blood Group</option>
-              {["A+","A-","B+","B-","O+","O-","AB+","AB-"].map(bg=>(
-                <option key={bg} value={bg}>{bg}</option>
+              {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((bg) => (
+                <option key={bg} value={bg}>
+                  {bg}
+                </option>
               ))}
             </select>
           </div>
